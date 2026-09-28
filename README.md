@@ -7,7 +7,9 @@ watchlist and its rate (price in dollars per 1,000 RAP) is at or below `MAX_RATE
 ## On GitHub Actions
 
 `.github/workflows/check.yml` runs both sites every 5 minutes, and you can run
-it by hand from **Actions → Check markets → Run workflow**. Seen listings are
+it by hand from **Actions → Check markets → Run workflow**. Tick **Send test
+alert** there to just send one test notification (no sites checked, seen
+listings untouched). Seen listings are
 saved on the `state` branch so each listing only alerts once. The very first
 run records what's already listed without alerting.
 

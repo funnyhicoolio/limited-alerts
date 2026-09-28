@@ -4,19 +4,45 @@ on:
   schedule:
     - cron: "*/5 * * * *"   # every 5 minutes (GitHub may run it a few minutes late)
   workflow_dispatch:         # adds the "Run workflow" button on the Actions tab
+    inputs:
+      test_alert:
+        description: "Send test alert (only sends one notification; doesn't check the sites)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write            # needed to push seen files to the "state" branch
 
-# Never run two checks at once, so they can't both push to "state".
-concurrency:
-  group: check-markets
-  cancel-in-progress: false
-
 jobs:
+  test-alert:
+    if: ${{ inputs.test_alert }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions: {}
+    steps:
+      - name: Send test notification
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: |
+          if [ -z "$NTFY_TOPIC" ]; then
+            echo "::error::The NTFY_TOPIC secret is not set."
+            exit 1
+          fi
+          curl -fsS -o /dev/null \
+            -H "Title: limited-alerts test" \
+            -H "Tags: bell" \
+            -d "Test alert from GitHub Actions. If you see this, notifications work." \
+            "https://ntfy.sh/$NTFY_TOPIC"
+          echo "Test notification sent."
+
   check:
+    if: ${{ !inputs.test_alert }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # Never run two checks at once, so they can't both push to "state".
+    concurrency:
+      group: check-markets
+      cancel-in-progress: false
     steps:
       - name: Get the code
         uses: actions/checkout@v5
