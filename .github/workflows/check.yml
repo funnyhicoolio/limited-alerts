@@ -1,0 +1,60 @@
+name: Check markets
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes (GitHub may run it a few minutes late)
+  workflow_dispatch:         # adds the "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write            # needed to push seen files to the "state" branch
+
+# Never run two checks at once, so they can't both push to "state".
+concurrency:
+  group: check-markets
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v5
+
+      - name: Get the seen files (state branch)
+        uses: actions/checkout@v5
+        with:
+          ref: state
+          path: state
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Check both sites
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          WANTED_JSON: ${{ secrets.WANTED_JSON }}
+          IGNORED_JSON: ${{ secrets.IGNORED_JSON }}
+          MAX_RATE: ${{ secrets.MAX_RATE }}
+          STATE_DIR: ${{ github.workspace }}/state
+        run: python run_all.py --once
+
+      - name: Save seen files to the state branch (only if they changed)
+        if: always()
+        working-directory: state
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Seen files unchanged; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update seen listings"
+          git push origin HEAD:state

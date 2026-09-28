@@ -1,0 +1,12 @@
+# Personal settings (your ntfy topic and watchlist)
+settings.py
+.env
+
+# Seen-listing files: kept locally, and on the "state" branch on GitHub
+seen.json
+roplace_seen.json
+state/
+
+# Python
+__pycache__/
+*.pyc
