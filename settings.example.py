@@ -20,6 +20,13 @@ WANTED = []
 # Example:  IGNORED = ["Cap", "Fedora"]
 IGNORED = []
 
+# Per-item rate limits. If an item's name (or its Adurite alias) contains
+# one of these keywords (any capitalisation), it alerts only at this rate or
+# lower, instead of MAX_RATE, and it alerts even if it isn't in WANTED.
+# IGNORED still wins over this.
+# Example:  RATE_OVERRIDES = {"dominus": 4}
+RATE_OVERRIDES = {}
+
 # Your ntfy topic name. Pick something long and hard to guess,
 # because anyone who knows the name can read your alerts.
 NTFY_TOPIC = "pick-a-long-random-topic-name"

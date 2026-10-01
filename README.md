@@ -22,6 +22,11 @@ Actions → New repository secret**):
 | `WANTED_JSON`  | `["punk face", "lipstick"]` (or `[]` for any item) |
 | `IGNORED_JSON` | `["bandana"]` (or `[]`)                  |
 | `MAX_RATE`     | `6`                                      |
+| `RATE_OVERRIDES_JSON` | `{"dominus": 4}` (or `{}`) |
+
+`RATE_OVERRIDES_JSON` gives some items their own max rate: an item whose name
+(or Adurite alias) contains a keyword alerts only at that rate or lower, even
+if it isn't in `WANTED` and even if `MAX_RATE` is higher. `IGNORED` still wins.
 
 If a site returns 403 or a Cloudflare page, the run says which one and still
 checks the other. Blocks are not retried.

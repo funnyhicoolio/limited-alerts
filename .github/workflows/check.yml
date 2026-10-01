@@ -68,6 +68,7 @@ jobs:
           WANTED_JSON: ${{ secrets.WANTED_JSON }}
           IGNORED_JSON: ${{ secrets.IGNORED_JSON }}
           MAX_RATE: ${{ secrets.MAX_RATE }}
+          RATE_OVERRIDES_JSON: ${{ secrets.RATE_OVERRIDES_JSON }}
           STATE_DIR: ${{ github.workspace }}/state
         run: python run_all.py --once
 

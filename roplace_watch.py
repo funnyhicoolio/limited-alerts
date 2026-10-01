@@ -18,7 +18,7 @@ import sys
 
 import requests
 
-from config import IGNORED, MAX_RATE, NTFY_TOPIC, STATE_DIR, WANTED, describe
+from config import IGNORED, MAX_RATE, NTFY_TOPIC, STATE_DIR, WANTED, describe, find_override
 
 API_URL = "https://api.ro.place/graphql"
 NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
@@ -118,7 +118,10 @@ def check_listing(listing):
     ignored = [word for word in IGNORED if word.lower() in name]
     if ignored:
         return False, f"name matches IGNORED ({ignored[0]!r})", None
-    if WANTED and not any(word.lower() in name for word in WANTED):
+    # An override keyword alerts even if the item isn't in WANTED, and its
+    # rate replaces MAX_RATE. The rate itself is never printed.
+    override = find_override(name)
+    if override is None and WANTED and not any(word.lower() in name for word in WANTED):
         return False, "name not in WANTED", None
     rap = to_number(listing.get("rap"))
     if not rap:
@@ -127,6 +130,10 @@ def check_listing(listing):
     if price is None:
         return False, "price is missing", None
     rate = price / (rap / 1000)
+    if override is not None:
+        if rate > override:
+            return False, f"rate {rate:.2f} > override rate (RATE_OVERRIDES)", rate
+        return True, f"rate {rate:.2f} <= override rate (RATE_OVERRIDES)", rate
     if rate > MAX_RATE:
         return False, f"rate {rate:.2f} > MAX_RATE {MAX_RATE}", rate
     return True, f"rate {rate:.2f} <= MAX_RATE {MAX_RATE}", rate
