@@ -6,8 +6,11 @@ watchlist and its rate (price in dollars per 1,000 RAP) is at or below `MAX_RATE
 
 ## On GitHub Actions
 
-`.github/workflows/check.yml` runs both sites every 5 minutes, and you can run
-it by hand from **Actions → Check markets → Run workflow**. Tick **Send test
+`.github/workflows/check.yml` checks Adurite only. It has no schedule of its
+own: a timer on a separate server starts it every 5 minutes through
+`workflow_dispatch`, and the same server checks RoPlace every 30 seconds
+(`python run_all.py --only RoPlace`). You can also run the workflow
+by hand from **Actions → Check markets → Run workflow**. Tick **Send test
 alert** there to just send one test notification (no sites checked, seen
 listings untouched). Seen listings are
 saved on the `state` branch so each listing only alerts once. The very first
