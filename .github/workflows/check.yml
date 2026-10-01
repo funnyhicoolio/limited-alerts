@@ -62,7 +62,7 @@ jobs:
       - name: Install requirements
         run: pip install -r requirements.txt
 
-      - name: Check both sites
+      - name: Check Adurite (RoPlace is checked by the server)
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           WANTED_JSON: ${{ secrets.WANTED_JSON }}
@@ -70,7 +70,7 @@ jobs:
           MAX_RATE: ${{ secrets.MAX_RATE }}
           RATE_OVERRIDES_JSON: ${{ secrets.RATE_OVERRIDES_JSON }}
           STATE_DIR: ${{ github.workspace }}/state
-        run: python run_all.py --once
+        run: python run_all.py --once --only Adurite
 
       - name: Save seen files to the state branch (only if they changed)
         if: always()
