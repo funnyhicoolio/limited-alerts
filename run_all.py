@@ -5,6 +5,8 @@ its own process, with every line labelled [Adurite] or [RoPlace].
     python run_all.py          check both sites every POLL_SECONDS (local use)
     python run_all.py --once   check both sites once and exit (GitHub Actions)
 
+Add --only Adurite or --only RoPlace to check just that site.
+
 If a site blocks us (403 / Cloudflare page), that site is reported and not
 tried again while this is running; the other site keeps going.
 Ctrl + C stops both. Settings are in settings.py (or GitHub secrets).
@@ -84,7 +86,16 @@ def run_round(labels, env):
 
 
 def main():
-    once = "--once" in sys.argv[1:]
+    args = sys.argv[1:]
+    once = "--once" in args
+    labels = [label for label, _ in SCRIPTS]
+    if "--only" in args:
+        i = args.index("--only")
+        wanted = args[i + 1].lower() if i + 1 < len(args) else ""
+        labels = [label for label in labels if label.lower() == wanted]
+        if not labels:
+            print(f"--only must be followed by one of: {', '.join(label for label, _ in SCRIPTS)}")
+            return 3
 
     # Item names can contain emoji; make sure they don't crash the output.
     try:
@@ -93,7 +104,7 @@ def main():
         pass
 
     env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
-    active = [label for label, _ in SCRIPTS]
+    active = list(labels)
     serious_problem = False
 
     try:
@@ -113,7 +124,7 @@ def main():
             if not active:
                 say("run_all", "no sites left to check; stopping.")
                 break
-            if len(active) < len(SCRIPTS):
+            if len(active) < len(labels):
                 say("run_all", f"still checking: {', '.join(active)}")
             time.sleep(POLL_SECONDS)
     except KeyboardInterrupt:

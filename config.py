@@ -25,6 +25,8 @@ except ImportError:
     _local = None
 
 ON_GITHUB = os.environ.get("GITHUB_ACTIONS") == "true"
+# systemd sets INVOCATION_ID for services; their output goes to the system log.
+AS_SERVICE = bool(os.environ.get("INVOCATION_ID"))
 
 
 class ConfigError(Exception):
@@ -116,11 +118,12 @@ def find_override(*texts):
 
 def describe():
     """One line summarising the settings, safe to print in public GitHub logs."""
-    if ON_GITHUB:
-        # Actions logs on a public repo are public: don't reveal the topic or lists.
+    if ON_GITHUB or AS_SERVICE:
+        # Actions logs on a public repo are public, and a service's log is kept
+        # on disk: don't reveal the topic or lists.
         return (
             f"MAX_RATE = {MAX_RATE}, WANTED = {len(WANTED)} words, IGNORED = {len(IGNORED)} words, "
-            f"RATE_OVERRIDES = {len(RATE_OVERRIDES)} keywords (from secrets)"
+            f"RATE_OVERRIDES = {len(RATE_OVERRIDES)} keywords (values hidden)"
         )
     # Override rates are never printed, only the keywords.
     return (

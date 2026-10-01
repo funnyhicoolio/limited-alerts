@@ -37,6 +37,7 @@ checks the other. Blocks are not retried.
 pip install -r requirements.txt
 copy settings.example.py settings.py     # then edit settings.py
 python run_all.py                        # checks both sites every POLL_SECONDS
+python run_all.py --only RoPlace         # checks just one site
 ```
 
 `python adurite_watch.py` or `python roplace_watch.py` checks one site once.
